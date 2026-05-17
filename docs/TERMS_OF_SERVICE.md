@@ -3,7 +3,7 @@
 **Standalone Finance Management ("SFM", "the app")**
 **Effective date:** 2026-05-16
 **Last updated:** 2026-05-16
-**Public URL:** https://finance.appointer.hu/terms
+**Public URL:** https://portfolio.appointer.hu/projects/finance-manager/terms
 
 These terms govern your use of SFM. By installing or using the app you agree to them. If you don't, do not use the app.
 
@@ -13,7 +13,7 @@ There is no account, no subscription, and no fee, so these terms are short.
 
 SFM is a personal-finance tool that runs on your phone. It connects to your bank through Tink AB (a Visa company) so you can see your accounts and transactions in one place, and it computes recurring payments, income streams, expense profiles, and a 30-day balance forecast locally on your device.
 
-The app is provided by Béla Hajzer, Hungary. Contact: support@finance.appointer.hu.
+The app is provided by Béla Hajzer, Hungary. Contact: support@appointer.hu.
 
 ## 2. What the app is not
 
@@ -33,7 +33,7 @@ The app is provided by Béla Hajzer, Hungary. Contact: support@finance.appointer
 
 Don't try to:
 
-- reverse-engineer or tamper with the app or the bridge for purposes other than security research disclosed in good faith to support@finance.appointer.hu;
+- reverse-engineer or tamper with the app or the bridge for purposes other than security research disclosed in good faith to support@appointer.hu;
 - abuse the OAuth bridge in ways that exceed reasonable personal use (the bridge is rate-limited at the platform level);
 - use the app to facilitate fraud, money laundering, or unauthorised access to anyone's bank account.
 
@@ -78,4 +78,4 @@ These terms are governed by the laws of Hungary, without regard to conflict-of-l
 
 ## 12. Contact
 
-support@finance.appointer.hu
+support@appointer.hu

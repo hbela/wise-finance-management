@@ -6,6 +6,12 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#674A2B"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -19,7 +25,8 @@
     "android": {
       "package": "com.elyscom.standalonefinancemanagement",
       "adaptiveIcon": {
-        "backgroundColor": "#F5F7F9"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#674A2B"
       },
       "intentFilters": [
         {

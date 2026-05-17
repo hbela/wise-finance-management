@@ -389,8 +389,6 @@ type TinkSyncResponse = {
   };
 };
 
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_URL;
-
 function useBankConnection(
   isPersisted: boolean,
   bankConnectionReturn?: BankConnectionReturn | null,

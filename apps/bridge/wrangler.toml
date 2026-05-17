@@ -10,30 +10,34 @@ TINK_API_BASE_URL = "https://api.tink.com"
 APP_DEEP_LINK_SCHEME = "standalone-finance"
 SIGNATURE_TIMESTAMP_TOLERANCE_SECONDS = "300"
 
-# Universal Links / App Links (M7.9). When APP_UNIVERSAL_LINK_HOST is set, the
-# OAuth callback redirects native flows to https://<host>/oauth/<provider>#...
-# instead of the custom scheme, and the bridge serves
-# /.well-known/apple-app-site-association + /.well-known/assetlinks.json.
-APP_UNIVERSAL_LINK_HOST = "finance.appointer.hu"
-IOS_APP_BUNDLE_ID = "com.elyscom.standalonefinancemanagement"
-ANDROID_PACKAGE_NAME = "com.elyscom.standalonefinancemanagement"
-
-# Bind finance.appointer.hu to this Worker via the Cloudflare dashboard
-# (Workers & Pages → standalone-finance-bridge → Triggers → Custom Domains).
+# Universal Links / App Links (M7.9) — currently DISABLED.
+# When APP_UNIVERSAL_LINK_HOST is set, the OAuth callback redirects native flows
+# to https://<host>/oauth/<provider>#... instead of the custom scheme, and the
+# bridge serves /.well-known/apple-app-site-association + /.well-known/assetlinks.json.
+#
+# Re-enable by uncommenting the three vars below, binding the host to this
+# Worker via the Cloudflare dashboard (Workers & Pages → standalone-finance-bridge
+# → Settings → Domains & Routes → Add Custom Domain), and setting the
+# IOS_TEAM_ID and/or ANDROID_SHA256_FINGERPRINTS secrets. Until then, OAuth
+# returns fall back to standalone-finance://oauth/tink#... (custom scheme).
+#
+# APP_UNIVERSAL_LINK_HOST = "finance.appointer.hu"
+# IOS_APP_BUNDLE_ID = "com.elyscom.standalonefinancemanagement"
+# ANDROID_PACKAGE_NAME = "com.elyscom.standalonefinancemanagement"
 
 [secrets]
 required = [
   "TINK_CLIENT_ID",
   "TINK_CLIENT_SECRET",
-  "TINK_REDIRECT_URI",
-  "IOS_TEAM_ID",
-  "ANDROID_SHA256_FINGERPRINTS"
+  "TINK_REDIRECT_URI"
 ]
 
 # Secrets to set via `wrangler secret put <NAME>`:
 #   TINK_CLIENT_ID
 #   TINK_CLIENT_SECRET
 #   TINK_REDIRECT_URI                 (must match the URL registered in Tink Console)
+#
+# Optional — only when Universal Links / App Links are re-enabled (see block above):
 #   IOS_TEAM_ID                       (Apple Developer team ID, 10-char alphanumeric)
 #   ANDROID_SHA256_FINGERPRINTS       (comma-separated SHA-256 cert fingerprints from
 #                                      Play App Signing or your release keystore)

@@ -3,7 +3,7 @@
 **Standalone Finance Management ("SFM", "the app")**
 **Effective date:** 2026-05-16
 **Last updated:** 2026-05-16
-**Public URL:** https://finance.appointer.hu/privacy
+**Public URL:** https://portfolio.appointer.hu/projects/finance-manager/privacy
 
 ## 1. The short version
 
@@ -16,7 +16,7 @@ If you uninstall the app, your data is gone. There is nothing for us to delete o
 SFM is an independent personal-finance application. The data controller for the small set of in-transit traffic described in section 4 is:
 
 - **Operator:** Béla Hajzer
-- **Contact:** support@finance.appointer.hu
+- **Contact:** support@appointer.hu
 - **Jurisdiction:** Hungary (EU)
 
 ## 3. What data the app handles, and where it lives
@@ -74,7 +74,7 @@ Because we hold no data about you, the standard GDPR requests resolve immediatel
 - **Right to object / restrict (Art. 21, 18):** no processing is happening on our side beyond the in-transit handling in section 4; you can stop it at any time by disconnecting your bank in Settings or uninstalling the app.
 - **Right to lodge a complaint:** the supervisory authority for Hungary is the Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH), https://naih.hu.
 
-For any of the above, you can also email support@finance.appointer.hu and we will respond within 30 days.
+For any of the above, you can also email support@appointer.hu and we will respond within 30 days.
 
 ## 8. Children
 
@@ -88,7 +88,7 @@ The app is not directed to children under 16 and we do not knowingly process dat
 - App-open is gated by biometric authentication (FaceID / TouchID / fingerprint / device passcode) when your device has it configured.
 - The bridge code is open for inspection; deploys are pinned to specific reviewed commits.
 
-No system is perfectly secure. If you discover a security issue, please email support@finance.appointer.hu.
+No system is perfectly secure. If you discover a security issue, please email support@appointer.hu.
 
 ## 10. Data retention
 
@@ -106,4 +106,4 @@ If we change the architecture in a way that affects this policy (for example, if
 
 ## 13. Contact
 
-support@finance.appointer.hu
+support@appointer.hu
