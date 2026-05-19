@@ -52,28 +52,49 @@ function isThemeMode(value: unknown): value is FinanceThemeMode {
 }
 
 async function readPreference(key: string): Promise<string | null> {
-  if (Platform.OS === "web") {
-    return typeof window === "undefined" ? null : window.localStorage.getItem(key);
+  if (canUseWebStorage()) {
+    return window.localStorage.getItem(key);
   }
+  ensureSecureStoreAvailable();
   return SecureStore.getItemAsync(key);
 }
 
 async function writePreference(key: string, value: string): Promise<void> {
-  if (Platform.OS === "web") {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(key, value);
-    }
+  if (canUseWebStorage()) {
+    window.localStorage.setItem(key, value);
     return;
   }
+  ensureSecureStoreAvailable();
   await SecureStore.setItemAsync(key, value);
 }
 
 async function removePreference(key: string): Promise<void> {
-  if (Platform.OS === "web") {
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(key);
-    }
+  if (canUseWebStorage()) {
+    window.localStorage.removeItem(key);
     return;
   }
+  ensureSecureStoreAvailable();
   await SecureStore.deleteItemAsync(key);
+}
+
+function canUseWebStorage() {
+  return (
+    Platform.OS === "web" &&
+    typeof window !== "undefined" &&
+    typeof window.localStorage?.getItem === "function" &&
+    typeof window.localStorage?.setItem === "function" &&
+    typeof window.localStorage?.removeItem === "function"
+  );
+}
+
+function ensureSecureStoreAvailable() {
+  if (
+    typeof SecureStore.getItemAsync !== "function" ||
+    typeof SecureStore.setItemAsync !== "function" ||
+    typeof SecureStore.deleteItemAsync !== "function"
+  ) {
+    throw new Error(
+      "Secure preference storage is unavailable. Install a fresh development build that includes expo-secure-store."
+    );
+  }
 }

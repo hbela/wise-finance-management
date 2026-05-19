@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "SFM",
+    "slug": "standalone-finance-management",
+    "scheme": "standalone-finance",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./apps/mobile/assets/icon.png",
+    "splash": {
+      "image": "./apps/mobile/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#674A2B"
+    },
+    "assetBundlePatterns": [
+      "apps/mobile/assets/**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elyscom.standalonefinancemanagement",
+      "associatedDomains": [
+        "applinks:finance.appointer.hu"
+      ]
+    },
+    "android": {
+      "package": "com.elyscom.standalonefinancemanagement",
+      "adaptiveIcon": {
+        "foregroundImage": "./apps/mobile/assets/adaptive-icon.png",
+        "backgroundColor": "#674A2B"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "finance.appointer.hu",
+              "pathPrefix": "/oauth"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0977bdb6-f276-480d-92f3-fc5b6dbe3899"
+      }
+    },
+    "owner": "elyscom"
+  }
+}

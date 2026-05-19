@@ -9,6 +9,7 @@ import type {
   TransactionRow,
   UserRow,
 } from "./mappers";
+import { Platform } from "react-native";
 
 const storageKey = "standalone-finance.web-fallback-store.v1";
 
@@ -40,8 +41,7 @@ export function isWebFallbackStorageEnabled() {
   // Force localStorage fallback on all web contexts. wa-sqlite's worker times out
   // on this dev setup even when crossOriginIsolated reports true (see error
   // "Sync operation timeout" thrown from openDatabaseSync). Native is unaffected.
-  if (typeof window !== "undefined") return true;
-  return false;
+  return canUseWebStorage();
 }
 
 export const webFallbackStore = {
@@ -90,7 +90,7 @@ function createCollection<K extends keyof WebFallbackState>(key: K) {
 }
 
 function readState(): WebFallbackState {
-  if (typeof window === "undefined") {
+  if (!canUseWebStorage()) {
     return emptyState;
   }
 
@@ -120,8 +120,17 @@ function readState(): WebFallbackState {
 }
 
 function writeState(state: WebFallbackState) {
-  if (typeof window === "undefined") {
+  if (!canUseWebStorage()) {
     return;
   }
   window.localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+function canUseWebStorage() {
+  return (
+    Platform.OS === "web" &&
+    typeof window !== "undefined" &&
+    typeof window.localStorage?.getItem === "function" &&
+    typeof window.localStorage?.setItem === "function"
+  );
 }

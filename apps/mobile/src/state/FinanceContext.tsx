@@ -122,6 +122,7 @@ type FinanceContextValue = {
   archiveTransaction: (transactionId: string) => Promise<void>;
   revertImportBatch: (importBatchId: string) => Promise<void>;
   addLiability: (input: NewLiabilityInput) => Promise<void>;
+  addSampleLiabilities: () => Promise<void>;
   updateLiability: (input: UpdateLiabilityInput) => Promise<void>;
   archiveLiability: (liabilityId: string) => Promise<void>;
   updateSettings: (input: { country: Country; baseCurrency: Currency; locale: string }) => Promise<void>;
@@ -560,6 +561,18 @@ function SQLiteFinanceProvider({ children }: { children: ReactNode }) {
           await refreshSQLiteQueries();
         });
       },
+      addSampleLiabilities: async () => {
+        await runMutation(setError, async () => {
+          const now = Date.now();
+          const rows: LiabilityRow[] = sampleLiabilityRows(now);
+          if (isWebFallbackStorageEnabled()) {
+            await webFallbackStore.liabilities.upsert(rows);
+          } else {
+            await liabilitiesRepo.upsert(await ensureMirrorDatabaseReady(), rows);
+          }
+          await refreshSQLiteQueries();
+        });
+      },
       updateLiability: async (input) => {
         await runMutation(setError, async () => {
           const current = liabilitiesQuery.data?.find((liability) => liability.id === input.id);
@@ -773,6 +786,49 @@ function liabilityRowToLiability(row: LiabilityRow): Liability {
     nextDueDate: row.nextDueDate,
     rateType: row.rateType as Liability["rateType"]
   };
+}
+
+function sampleLiabilityRows(now: number): LiabilityRow[] {
+  return [
+    {
+      id: "sample-liability-personal-loan",
+      userId: localSQLiteUserId,
+      linkedAccountId: null,
+      name: "Sample personal loan",
+      institution: "Demo Credit Union",
+      type: "personal_loan",
+      currency: "EUR",
+      originalPrincipal: 7500,
+      outstandingBalance: 4320,
+      interestRate: 6.2,
+      paymentAmount: 185,
+      paymentFrequency: "monthly",
+      nextDueDate: "2026-05-24",
+      rateType: "fixed",
+      archivedAt: null,
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "sample-liability-mortgage",
+      userId: localSQLiteUserId,
+      linkedAccountId: null,
+      name: "Sample mortgage",
+      institution: "OTP Bank",
+      type: "mortgage",
+      currency: "HUF",
+      originalPrincipal: 42000000,
+      outstandingBalance: 31750000,
+      interestRate: 5.1,
+      paymentAmount: 245000,
+      paymentFrequency: "monthly",
+      nextDueDate: "2026-05-15",
+      rateType: "variable",
+      archivedAt: null,
+      createdAt: now,
+      updatedAt: now
+    }
+  ];
 }
 
 function importBatchRowToImportBatch(row: ImportBatchRow): ImportBatch {

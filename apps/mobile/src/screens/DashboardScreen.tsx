@@ -9,7 +9,6 @@ import { MetricCard } from "../components/MetricCard";
 import { Screen } from "../components/Screen";
 import { SectionTitle } from "../components/SectionTitle";
 import { StateCard } from "../components/StateCard";
-import { alerts } from "../data/mockFinance";
 import type { ExpenseProfileRow, IncomeStreamRow } from "../db/mappers";
 import {
   archiveExpenseProfile,
@@ -21,7 +20,7 @@ import {
   listActiveExpenseProfiles,
   listActiveIncomeStreams,
 } from "../services/sqlitePfm";
-import type { Account, Currency } from "../data/types";
+import type { Account, Alert, Currency, Liability } from "../data/types";
 import { sqliteFinanceQueryKeys, useFinance, useFxSnapshot } from "../state/FinanceContext";
 import { useFinanceTheme, type FinanceTheme } from "../theme";
 import { getAccountBalanceReconciliations, getCurrencyExposure, getDashboardSummary } from "../utils/finance";
@@ -39,6 +38,7 @@ export function DashboardScreen() {
   const exposure = getCurrencyExposure(accounts, fxSnapshot);
   const reconciliations = getAccountBalanceReconciliations(accounts, transactions);
   const exposureDenominator = Math.max(Math.abs(summary.cash), 1);
+  const alerts = useMemo(() => buildLiabilityAlerts(liabilities), [liabilities]);
 
   const incomeStreamQuery = useQuery({
     queryKey: sqliteFinanceQueryKeys.incomeStreams,
@@ -341,21 +341,25 @@ export function DashboardScreen() {
       )}
 
       <SectionTitle title="Alerts" />
-      <View style={styles.alerts}>
-        {alerts.map((alert) => (
-          <Card key={alert.id} mode="contained" style={styles.alertCard}>
-            <Card.Content style={styles.alertContent}>
-              <List.Icon icon={alert.tone === "warning" ? "calendar-alert" : "check-circle-outline"} />
-              <View style={styles.alertText}>
-                <Text variant="titleSmall">{alert.title}</Text>
-                <Text variant="bodySmall" style={styles.muted}>
-                  {alert.detail}
-                </Text>
-              </View>
-            </Card.Content>
-          </Card>
-        ))}
-      </View>
+      {alerts.length > 0 ? (
+        <View style={styles.alerts}>
+          {alerts.map((alert) => (
+            <Card key={alert.id} mode="contained" style={styles.alertCard}>
+              <Card.Content style={styles.alertContent}>
+                <List.Icon icon={getAlertIcon(alert.tone)} />
+                <View style={styles.alertText}>
+                  <Text variant="titleSmall">{alert.title}</Text>
+                  <Text variant="bodySmall" style={styles.muted}>
+                    {alert.detail}
+                  </Text>
+                </View>
+              </Card.Content>
+            </Card>
+          ))}
+        </View>
+      ) : (
+        <StateCard title="No alerts" detail="No tracked liability payments are due in the next week." />
+      )}
       <AddAccountDialog visible={addAccountVisible} onDismiss={() => setAddAccountVisible(false)} />
       <EditAccountDialog
         account={selectedAccount}
@@ -516,6 +520,86 @@ function createStyles(theme: FinanceTheme) {
 async function runPFMAction(action: () => Promise<void>, queryClient: QueryClient) {
   await action();
   await queryClient.invalidateQueries({ queryKey: sqliteFinanceQueryKeys.root });
+}
+
+function buildLiabilityAlerts(liabilities: Liability[]): Alert[] {
+  const today = startOfUtcDay(Date.now());
+  const soonestFirst = liabilities
+    .map((liability) => {
+      const dueAt = parseIsoDate(liability.nextDueDate);
+      return dueAt === null ? null : { liability, dueAt };
+    })
+    .filter((item): item is { liability: Liability; dueAt: number } => Boolean(item))
+    .filter(({ dueAt }) => dueAt <= today + 7 * DAY_MS)
+    .sort((left, right) => left.dueAt - right.dueAt);
+
+  return soonestFirst.map(({ liability, dueAt }) => {
+    const daysUntilDue = Math.round((dueAt - today) / DAY_MS);
+    const isOverdue = daysUntilDue < 0;
+    const title = isOverdue
+      ? `${formatLiabilityType(liability.type)} overdue`
+      : `${formatLiabilityType(liability.type)} due soon`;
+    const dueText =
+      daysUntilDue === 0
+        ? "today"
+        : isOverdue
+          ? `${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) === 1 ? "" : "s"} ago`
+          : `in ${daysUntilDue} day${daysUntilDue === 1 ? "" : "s"}`;
+
+    return {
+      id: `liability-alert-${liability.id}`,
+      title,
+      detail: `${liability.institution} payment of ${formatMoney(
+        liability.paymentAmount,
+        liability.currency
+      )} is due ${dueText} (${liability.nextDueDate}).`,
+      tone: isOverdue ? "error" : "warning"
+    };
+  });
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function startOfUtcDay(epochMs: number) {
+  const date = new Date(epochMs);
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+}
+
+function parseIsoDate(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    return null;
+  }
+  const [, year, month, day] = match;
+  return Date.UTC(Number(year), Number(month) - 1, Number(day));
+}
+
+function formatLiabilityType(type: Liability["type"]) {
+  switch (type) {
+    case "mortgage":
+      return "Mortgage";
+    case "student_loan":
+      return "Student loan";
+    case "car_loan":
+      return "Car loan";
+    case "credit_card_debt":
+      return "Card debt";
+    case "personal_loan":
+      return "Loan";
+    default:
+      return "Liability";
+  }
+}
+
+function getAlertIcon(tone: Alert["tone"]) {
+  switch (tone) {
+    case "error":
+      return "alert-circle-outline";
+    case "warning":
+      return "calendar-alert";
+    default:
+      return "check-circle-outline";
+  }
 }
 
 function formatStreamFrequency(frequency: IncomeStreamRow["frequency"]) {

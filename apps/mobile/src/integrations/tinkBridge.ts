@@ -398,24 +398,49 @@ function base64UrlDecode(value: string) {
 }
 
 async function readStorage(key: string) {
-  if (Platform.OS === "web") {
+  if (canUseWebStorage()) {
     return window.localStorage.getItem(key);
   }
+  ensureSecureStoreAvailable();
   return SecureStore.getItemAsync(key);
 }
 
 async function writeStorage(key: string, value: string) {
-  if (Platform.OS === "web") {
+  if (canUseWebStorage()) {
     window.localStorage.setItem(key, value);
     return;
   }
+  ensureSecureStoreAvailable();
   await SecureStore.setItemAsync(key, value);
 }
 
 async function deleteStorage(key: string) {
-  if (Platform.OS === "web") {
+  if (canUseWebStorage()) {
     window.localStorage.removeItem(key);
     return;
   }
+  ensureSecureStoreAvailable();
   await SecureStore.deleteItemAsync(key);
+}
+
+function canUseWebStorage() {
+  return (
+    Platform.OS === "web" &&
+    typeof window !== "undefined" &&
+    typeof window.localStorage?.getItem === "function" &&
+    typeof window.localStorage?.setItem === "function" &&
+    typeof window.localStorage?.removeItem === "function"
+  );
+}
+
+function ensureSecureStoreAvailable() {
+  if (
+    typeof SecureStore.getItemAsync !== "function" ||
+    typeof SecureStore.setItemAsync !== "function" ||
+    typeof SecureStore.deleteItemAsync !== "function"
+  ) {
+    throw new Error(
+      "Secure token storage is unavailable. Install a fresh development build that includes expo-secure-store."
+    );
+  }
 }

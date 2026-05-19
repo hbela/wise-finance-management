@@ -1,5 +1,6 @@
 import { isWebFallbackStorageEnabled, webFallbackStore } from "./webFallbackStore";
 import type { AccountRow, TransactionRow, UserRow } from "./mappers";
+import { Platform } from "react-native";
 
 const originalWindow = global.window;
 const originalSharedArrayBuffer = global.SharedArrayBuffer;
@@ -82,6 +83,10 @@ const transaction: TransactionRow = {
 
 beforeEach(() => {
   installWindow();
+  Object.defineProperty(Platform, "OS", {
+    value: "web",
+    configurable: true,
+  });
   delete (global as { SharedArrayBuffer?: unknown }).SharedArrayBuffer;
   Object.defineProperty(global, "crossOriginIsolated", {
     value: false,
@@ -90,6 +95,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  Object.defineProperty(Platform, "OS", {
+    value: "ios",
+    configurable: true,
+  });
   global.window = originalWindow;
   if (originalSharedArrayBuffer) {
     global.SharedArrayBuffer = originalSharedArrayBuffer;
@@ -145,5 +154,17 @@ describe("webFallbackStore", () => {
     await expect(webFallbackStore.accounts.list()).resolves.toEqual([]);
     await webFallbackStore.accounts.upsert([account]);
     await expect(webFallbackStore.accounts.list()).resolves.toEqual([account]);
+  });
+
+  test("is disabled on native even when React Native provides a window global", async () => {
+    Object.defineProperty(Platform, "OS", {
+      value: "android",
+      configurable: true,
+    });
+    global.window = {} as Window & typeof globalThis;
+
+    expect(isWebFallbackStorageEnabled()).toBe(false);
+    await expect(webFallbackStore.accounts.list()).resolves.toEqual([]);
+    await expect(webFallbackStore.accounts.upsert([account])).resolves.toBeUndefined();
   });
 });
